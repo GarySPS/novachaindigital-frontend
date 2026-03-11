@@ -1,3 +1,5 @@
+//src>pages>SignUpPage.js
+
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { MAIN_API_BASE } from "../config";
