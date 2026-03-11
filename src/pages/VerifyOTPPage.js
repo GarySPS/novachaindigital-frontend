@@ -1,3 +1,5 @@
+//src>pages>VerifyOTPPage.js
+
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { MAIN_API_BASE } from "../config";
