@@ -115,35 +115,60 @@ export default function TradePage() {
     }
   }, []);
 
-  /* ---------------- Price polling (unchanged) ---------------- */
-  useEffect(() => {
-    let interval;
-    const fetchPrice = async () => {
-      try {
-        const res = await axios.get(`${MAIN_API_BASE}/prices/${selectedCoin.api}`);
-        
-        // Set price
-        setCoinPrice(Number(res.data?.price));
-        
-        // Set new stats
-        setCoinStats({
-          high: res.data?.high_24h || 0,
-          low: res.data?.low_24h || 0,
-          vol: res.data?.volume_24h || 0,
-          change: res.data?.percent_change_24h || 0,
-        });
+  /* ---------------- Price polling (REAL-TIME WEBSOCKET) ---------------- */
+  useEffect(() => {
+    let ws;
 
-        setFetchError(false);
-      } catch {
-        setCoinPrice(null);
-        setCoinStats(null); // Clear stats on error
-        setFetchError(true);
-      }
-    };
-    fetchPrice();
-    interval = setInterval(fetchPrice, 30000);
-    return () => clearInterval(interval);
-  }, [selectedCoin]);
+    // 1. Quick initial fetch so the UI doesn't look empty while connecting
+    const fetchInitialData = async () => {
+      try {
+        const res = await axios.get(`${MAIN_API_BASE}/prices/${selectedCoin.api}`);
+        // Only use fallback if WS hasn't taken over yet
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+          setCoinPrice(Number(res.data?.price));
+          setCoinStats({
+            high: res.data?.high_24h || 0,
+            low: res.data?.low_24h || 0,
+            vol: res.data?.volume_24h || 0,
+            change: res.data?.percent_change_24h || 0,
+          });
+        }
+        setFetchError(false);
+      } catch {
+        setFetchError(true);
+      }
+    };
+    fetchInitialData();
+
+    // 2. Connect to Binance Real-Time Stream
+    const symbolStream = `${selectedCoin.symbol.toLowerCase()}usdt@ticker`;
+    ws = new WebSocket(`wss://stream.binance.com:9443/ws/${symbolStream}`);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      // c = current price, h = high, l = low, q = quote volume (USDT), P = price change %
+      if (data.c) {
+        setCoinPrice(Number(data.c));
+        setCoinStats({
+          high: Number(data.h),
+          low: Number(data.l),
+          vol: Number(data.q), 
+          change: Number(data.P),
+        });
+        setFetchError(false);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error("WebSocket Error:", error);
+      setFetchError(true);
+    };
+
+    // 3. Cleanup on unmount or when changing coins
+    return () => {
+      if (ws) ws.close();
+    };
+  }, [selectedCoin]);
 
   /* ---------------- TradingView loader (Fixed) ---------------- */
   useEffect(() => {
