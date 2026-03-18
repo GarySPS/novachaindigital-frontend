@@ -309,13 +309,19 @@ export default function WalletPage() {
   }, [toast]);
 
   useEffect(() => {
-    if (!amount || isNaN(amount)) { setResult(""); return; }
-    if (fromCoin === toCoin) { setResult(""); return; }
-    if (!prices[fromCoin] || !prices[toCoin]) { setResult(""); return; }
-    const usdValue = parseFloat(amount) * prices[fromCoin];
-    const receive = usdValue / prices[toCoin];
-    setResult(receive.toFixed(toCoin === "BTC" ? 6 : toCoin === "ETH" ? 4 : 3));
-  }, [fromCoin, toCoin, amount, prices]);
+    if (!amount || isNaN(amount)) { setResult(""); return; }
+    if (fromCoin === toCoin) { setResult(""); return; }
+    
+    // SAFE CHECK: Default USDT to 1 if it hasn't loaded in state yet
+    const pFrom = prices[fromCoin] || (fromCoin === "USDT" ? 1 : 0);
+    const pTo = prices[toCoin] || (toCoin === "USDT" ? 1 : 0);
+
+    if (!pFrom || !pTo) { setResult(""); return; }
+
+    const usdValue = parseFloat(amount) * pFrom;
+    const receive = usdValue / pTo;
+    setResult(receive.toFixed(toCoin === "BTC" ? 6 : toCoin === "ETH" ? 4 : 3));
+  }, [fromCoin, toCoin, amount, prices]);
 
   function fetchBalances() {
     if (!token || !userId) return;

@@ -87,10 +87,8 @@ export default function ForexPage() {
   const [timerKey, setTimerKey] = useState(0);
   const [waitingResult, setWaitingResult] = useState(false);
 
-  const [tradeResult, setTradeResult] = useState(null);
   const [tradeDetail, setTradeDetail] = useState(null);
   const [fetchError, setFetchError] = useState(false);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // --- pretty toast ---
@@ -234,10 +232,8 @@ export default function ForexPage() {
     setTradeState(null);
     persistTradeState(null);
     if (trade && trade.result !== "PENDING") {
-      setTradeResult(trade.result === "WIN" ? trade.profit : -Math.abs(trade.profit));
       setTradeDetail(trade);
     } else {
-      setTradeResult(null);
       setTradeDetail(null);
       showToast(t("trade_result_not_ready", "Trade result not ready, please check history!"), "info");
     }
@@ -258,7 +254,6 @@ export default function ForexPage() {
   const executeTrade = async () => {
     if (!coinPrice || timerActive) return;
     setTimerActive(true);
-    setTradeResult(null);
     setTradeDetail(null);
 
     const token = localStorage.getItem("token");
@@ -306,7 +301,6 @@ export default function ForexPage() {
       persistTradeState({ trade_id, user_id, duration, endAt });
     } catch (err) {
       setTimerActive(false);
-      setTradeResult(null);
       setTradeDetail(null);
       persistTradeState(null);
       showToast(`${t("trade_failed", "Trade failed")}: ${err.response?.data?.error || err.message}`, "error");
