@@ -100,18 +100,17 @@ export default function ForexPage() {
   };
 
   /* ---------------- Restore active trade (unchanged) ---------------- */
-  useEffect(() => {
-    const saved = loadTradeState();
-    if (saved && saved.endAt > Date.now()) {
-      const remaining = Math.ceil((saved.endAt - Date.now()) / 1000);
-      const adjustedTradeState = { ...saved, duration: remaining };
-      setTradeState(adjustedTradeState);
-      setTimerActive(true);
-      setTradeDetail(null);
-      setTradeResult(null);
-      setTimerKey(Math.random());
-    }
-  }, []);
+  useEffect(() => {
+    const saved = loadTradeState();
+    if (saved && saved.endAt > Date.now()) {
+      const remaining = Math.ceil((saved.endAt - Date.now()) / 1000);
+      const adjustedTradeState = { ...saved, duration: remaining };
+      setTradeState(adjustedTradeState);
+      setTimerActive(true);
+      setTradeDetail(null);
+      setTimerKey(Math.random());
+    }
+  }, []);
 
   /* ---------------- Price polling (unchanged) ---------------- */
   useEffect(() => {
@@ -522,13 +521,12 @@ export default function ForexPage() {
                        >
                          {/* Close Button (Top Right corner of the card) */}
                          <button
-                           onClick={() => {
-                              setTradeDetail(null); // Clear the result object
-                              setTradeResult(null); // Clear the numeric result value too
-                           }}
-                           className="absolute top-3 right-3 z-20 h-7 w-7 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors flex items-center justify-center backdrop-blur-sm"
-                           aria-label="Close Result"
-                         >
+                           onClick={() => {
+                              setTradeDetail(null); // Clear the result object
+                           }}
+                           className="absolute top-3 right-3 z-20 h-7 w-7 rounded-full bg-black/40 text-white hover:bg-black/70 transition-colors flex items-center justify-center backdrop-blur-sm"
+                           aria-label="Close Result"
+                         >
                            {/* Simple 'X' icon using SVG */}
                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                              <line x1="18" y1="6" x2="6" y2="18"></line>
