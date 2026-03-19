@@ -226,3 +226,10 @@ body {
   font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   color: var(--primary);
 }
+/* Force OTP input text to be bright white */
+div[class*="react-codes-input"] input,
+div[class*="react-codes-input"] span {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    caret-color: #00eaff !important; /* Makes the blinking cursor cyan */
+}

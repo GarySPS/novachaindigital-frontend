@@ -280,13 +280,13 @@ return (
             {/* Colgroup remains same */}
             <colgroup><col className="w-24" /><col /><col className="w-28" /><col className="w-40" /><col className="w-28" /><col className="w-44" /><col className="w-44" /></colgroup>
             {/* Polished Head */}
-            <thead className="sticky top-0 z-10 bg-[#0f1424]"> {/* Dark background for head */}
+            <thead className="sticky top-0 z-10 bg-[#0f1424]">
               <tr className="text-left text-gray-400 border-y border-white/10">
                 <th className="py-3.5 px-3 text-center">#</th>
                 <th className="py-3.5 px-3">Name</th>
                 <th className="py-3.5 px-3">Symbol</th>
                 <th className="py-3.5 px-3 text-right">Price</th>
-                <th className="py-3.5 px-3 text-center">24h</th> {/* Centered */}
+                <th className="py-3.5 px-3 text-center">24h</th>
                 <th className="py-3.5 px-3 text-right whitespace-nowrap">
                   24h Volume
                 </th>
@@ -295,14 +295,15 @@ return (
                 </th>
               </tr>
             </thead>
+            
             {/* Polished Body */}
-            <tbody className="divide-y divide-white/10"> {/* Row dividers */}
+            <tbody className="divide-y divide-white/10">
               {loading
                 ? Array.from({ length: 12 }).map((_, i) => (
-                    // Use Polished Skeleton
                     /* ---------- ✨ Polished Skeleton ---------- */
-                    <tr key={`sk-${i}`} className="animate-pulse border-b border-white/10"> {/* Ensure border matches tbody divider */}
-                      {/* # and Icon */}
+                    <tr key={`sk-${i}`} className="animate-pulse border-b border-white/10">
+                   
+                                         {/* # and Icon */}
                       <td className="py-3 px-3">
                         <div className="flex items-center">
                           <span className="text-transparent text-xs font-medium w-8 tabular-nums text-right mr-2 bg-gray-700 rounded">00</span>

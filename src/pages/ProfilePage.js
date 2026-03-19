@@ -1,3 +1,5 @@
+//src>pages>ProfilePage.js
+
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";

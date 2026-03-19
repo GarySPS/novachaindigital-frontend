@@ -1,11 +1,11 @@
-//src>pages>VerifyOTPPage.js
+//src/pages/VerifyOTPPage.js
 
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { MAIN_API_BASE } from "../config";
-import ReactCodesInput from "react-codes-input";
+// REMOVED react-codes-input completely
 
-/* ---------- Inline Terms modal (updated) ---------- */
+/* ---------- Inline Terms modal ---------- */
 function TermsModal({ open, onAgree }) {
   if (!open) return null;
   return (
@@ -30,10 +30,7 @@ function TermsModal({ open, onAgree }) {
           </p>
 
           <ol className="list-decimal pl-5 space-y-3">
-            <li>
-              <b>Terms &amp; Conditions</b> — New user startup requires <b>100 USDT</b>.
-            </li>
-
+            <li><b>Terms &amp; Conditions</b> — New user startup requires <b>100 USDT</b>.</li>
             <li>
               <b>Account Security</b>
               <ul className="list-disc pl-5 mt-1 space-y-1">
@@ -43,7 +40,6 @@ function TermsModal({ open, onAgree }) {
                 <li>Confidentiality agreement applies between user and company.</li>
               </ul>
             </li>
-
             <li>
               <b>Funds</b>
               <ul className="list-disc pl-5 mt-1 space-y-1">
@@ -51,7 +47,6 @@ function TermsModal({ open, onAgree }) {
                 <li>Accidental loss due to <b>NovaChain’s own mistake</b>: the platform takes full responsibility.</li>
               </ul>
             </li>
-
             <li>
               <b>Deposit</b>
               <ul className="list-disc pl-5 mt-1 space-y-1">
@@ -60,7 +55,6 @@ function TermsModal({ open, onAgree }) {
                 <li>Platform is not responsible for losses caused by an incorrect wallet address entered by the user.</li>
               </ul>
             </li>
-
             <li>
               <b>Withdrawal</b>
               <ul className="list-disc pl-5 mt-1 space-y-1">
@@ -69,7 +63,6 @@ function TermsModal({ open, onAgree }) {
                 <li>Withdrawals &gt; <b>$10,000</b> require opening a large-channel account for fund safety.</li>
               </ul>
             </li>
-
             <li>
               <b>Hours of Operation</b>
               <ul className="list-disc pl-5 mt-1 space-y-1">
@@ -95,8 +88,7 @@ function TermsModal({ open, onAgree }) {
             onClick={onAgree}
             className="h-11 px-6 rounded-xl font-extrabold tracking-wide shadow-md transition-all"
             style={{
-              background:
-                "linear-gradient(90deg,#00eaff 0%,#1f2fff 53%,#ffd700 100%)",
+              background: "linear-gradient(90deg,#00eaff 0%,#1f2fff 53%,#ffd700 100%)",
               color: "#232836",
               letterSpacing: 1.2,
               boxShadow: "0 2px 16px #1f2fff14, 0 1.5px 0 #ffd70044",
@@ -122,7 +114,9 @@ export default function VerifyOTPPage() {
   const [resendSuccess, setResendSuccess] = useState("");
   const [resendTimer, setResendTimer] = useState(0);
   const [showTerms, setShowTerms] = useState(false);
-  const pinWrapperRef = useRef(null);
+  
+  // Use an array to store references to the 6 inputs natively
+  const inputRefs = useRef([]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -157,14 +151,15 @@ export default function VerifyOTPPage() {
       if (!res.ok) {
         setError(data.error || "Incorrect OTP. Please try again.");
         setOtp("");
+        if(inputRefs.current[0]) inputRefs.current[0].focus();
         return;
       }
       setSuccess(data.message || "Email verified!");
-      // Instead of navigating to login, open Terms modal immediately
       setShowTerms(true);
     } catch (err) {
       setError("Verification failed. Try again.");
       setOtp("");
+      if(inputRefs.current[0]) inputRefs.current[0].focus();
     }
   };
 
@@ -191,11 +186,45 @@ export default function VerifyOTPPage() {
     setResendLoading(false);
   };
 
- const onAgree = () => {
-   navigate("/", { replace: true }); // go home; nothing stored
- };
+  const onAgree = () => {
+    navigate("/login", { replace: true }); 
+  };
 
-return (
+  // Native OTP Handlers
+  const handleOtpChange = (e, index) => {
+    const val = e.target.value;
+    if (val && !/^[0-9]*$/.test(val)) return;
+
+    let newOtp = otp.split('');
+    while(newOtp.length < 6) newOtp.push(""); 
+    newOtp[index] = val.substring(val.length - 1); 
+    
+    const finalOtp = newOtp.join('').substring(0, 6);
+    setOtp(finalOtp);
+
+    // Auto-advance focus
+    if (val && index < 5) {
+      inputRefs.current[index + 1].focus();
+    }
+  };
+
+  const handleOtpKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1].focus();
+    }
+  };
+
+  const handleOtpPaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').substring(0, 6);
+    if (pastedData) {
+      setOtp(pastedData);
+      const focusIndex = Math.min(pastedData.length, 5);
+      if(inputRefs.current[focusIndex]) inputRefs.current[focusIndex].focus();
+    }
+  };
+
+  return (
     <div
       className="min-h-screen w-full flex items-center justify-center relative px-4 py-10"
       style={{
@@ -204,15 +233,9 @@ return (
         backgroundPosition: "center",
       }}
     >
-      {/* Overlay has been removed */}
-
       <div className="relative z-10 w-full">
-        {/* UPDATED: Card styling to match login page */}
         <div className="mx-auto w-full max-w-[480px] rounded-3xl bg-[#10162F]/80 backdrop-blur-xl shadow-2xl border border-sky-500/30 px-6 py-8 md:px-10 md:py-10">
 
-          {/* Logo has been removed */}
-          
-          {/* ADDED: Inner video to match login page */}
           <div className="w-full h-36 md:h-40 rounded-2xl overflow-hidden shadow-inner border border-sky-400/20">
               <video
                   src="/login.mp4"
@@ -224,16 +247,14 @@ return (
               />
           </div>
 
-          {/* UPDATED: Text styling for dark theme */}
-          <h2 className="mt-8 text-center text-2xl font-extrabold text-slate-100">
+          <h2 className="mt-8 text-center text-2xl md:text-3xl font-extrabold tracking-tight text-slate-100">
             Check your email to verify
           </h2>
-          <p className="text-base text-slate-300 text-center mb-6 font-medium">
+          <p className="text-sm md:text-base text-slate-300 text-center mb-8 mt-2 font-medium">
             Enter the 6-digit code sent to your email below.
           </p>
 
           <form onSubmit={handleVerify}>
-            {/* Email input is hidden as it's not editable, but kept for logic */}
             <input
               type="email"
               value={email}
@@ -243,50 +264,51 @@ return (
               className="hidden"
             />
 
-            {/* UPDATED: OTP input styling for dark theme */}
-            <div className="flex justify-center mb-4">
-              <ReactCodesInput
-                classNameWrapper="flex justify-center gap-2"
-                classNameCodeWrapper="w-11 h-12 md:w-12 md:h-14 flex-none"
-                classNameCode="border-2 border-slate-700 bg-slate-800/60 rounded-xl text-center text-2xl font-bold text-white focus:border-sky-400 transition"
-                classNameCodeWrapperFocus="shadow-[0_0_0_3px_rgba(56,189,248,0.3)]"
-                initialFocus={true}
-                wrapperRef={pinWrapperRef}
-                id="pin"
-                codeLength={6}
-                type="text"
-                value={otp}
-                onChange={setOtp}
-                inputMode="numeric"
-                autoFocus
-              />
+            {/* PREMIUM NATIVE OTP INPUTS (Matches SignUp Page styles) */}
+            <div className="flex justify-center gap-2 md:gap-3 mb-8">
+              {[0, 1, 2, 3, 4, 5].map((index) => {
+                const char = otp.length > index ? otp[index] : "";
+                return (
+                  <input
+                    key={index}
+                    ref={(el) => (inputRefs.current[index] = el)}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={1}
+                    value={char}
+                    autoFocus={index === 0}
+                    onChange={(e) => handleOtpChange(e, index)}
+                    onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                    onPaste={handleOtpPaste}
+                    className="w-12 h-14 md:w-14 md:h-16 rounded-xl text-center text-2xl md:text-3xl font-bold bg-slate-800/60 text-slate-100 placeholder-slate-500 border border-slate-700 focus:outline-none focus:ring-4 focus:ring-sky-400/20 focus:border-sky-400 transition shadow-inner"
+                  />
+                );
+              })}
             </div>
 
-            {/* UPDATED: Alert styling for dark theme */}
             {error && (
-              <div className="w-full max-w-sm mx-auto mb-3 rounded-lg border border-red-400/50 bg-red-500/20 px-3 py-2 text-sm text-center text-red-200">
+              <div className="w-full rounded-lg border border-red-400/50 bg-red-500/20 px-3 py-2 text-sm md:text-base text-center text-red-200 mb-4">
                 {error}
               </div>
             )}
             {success && (
-              <div className="w-full max-w-sm mx-auto mb-3 rounded-lg border border-emerald-400/50 bg-emerald-500/20 px-3 py-2 text-sm text-center text-emerald-200">
+              <div className="w-full rounded-lg border border-emerald-400/50 bg-emerald-500/20 px-3 py-2 text-sm md:text-base text-center text-emerald-200 mb-4">
                 {success}
               </div>
             )}
             {resendSuccess && (
-              <div className="w-full max-w-sm mx-auto mb-3 rounded-lg border border-sky-400/50 bg-sky-500/20 px-3 py-2 text-sm text-center text-sky-200">
+              <div className="w-full rounded-lg border border-sky-400/50 bg-sky-500/20 px-3 py-2 text-sm md:text-base text-center text-sky-200 mb-4">
                 {resendSuccess}
               </div>
             )}
 
-            {/* Submit button (styling is consistent) */}
             <button
-              className="w-full h-12 rounded-xl font-extrabold text-base md:text-lg tracking-wide shadow-lg border-0 outline-none transition active:scale-[.99] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="mt-1 w-full h-12 md:h-12 rounded-xl font-extrabold text-base md:text-lg tracking-wide shadow-lg border-0 outline-none transition active:scale-[.99] disabled:opacity-70 disabled:cursor-not-allowed"
               type="submit"
               style={{
-                background:
-                  "linear-gradient(90deg,#00eaff 0%,#1f2fff 55%,#ffd700 100%)",
+                background: "linear-gradient(90deg,#00eaff 0%,#1f2fff 55%,#ffd700 100%)",
                 color: "white",
+                letterSpacing: "0.02em",
                 boxShadow: "0 10px 24px rgba(0, 234, 255, 0.15)",
               }}
               disabled={otp.length < 6 || !email}
@@ -295,12 +317,11 @@ return (
             </button>
           </form>
 
-          {/* UPDATED: Link styling for dark theme */}
-          <div className="text-center mt-5 space-y-3">
+          <div className="text-center mt-6 space-y-4">
             <button
               type="button"
               onClick={handleResend}
-              className="font-bold text-sky-400 hover:text-sky-300 hover:underline disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline"
+              className="text-sm md:text-base font-bold text-sky-400 hover:text-sky-300 hover:underline disabled:opacity-60 disabled:cursor-not-allowed disabled:no-underline"
               disabled={resendLoading || resendTimer > 0}
             >
               {resendTimer > 0
@@ -309,7 +330,7 @@ return (
                 ? "Sending..."
                 : "Resend OTP"}
             </button>
-            <div className="text-sm">
+            <div className="text-sm md:text-base">
               <Link to="/login" className="font-bold text-slate-400 hover:text-slate-300 hover:underline transition">
                 Back to login
               </Link>
@@ -319,7 +340,6 @@ return (
         </div>
       </div>
 
-      {/* Terms modal (no changes needed, it's already dark) */}
       <TermsModal open={showTerms} onAgree={onAgree} />
     </div>
   );
