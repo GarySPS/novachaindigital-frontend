@@ -1,4 +1,4 @@
-//src>components>TimerBar.jsx
+// src/components/TimerBar.jsx
 import React, { useEffect, useRef, useState } from "react";
 
 export default function TimerBar({ endAt, onComplete }) {
@@ -9,6 +9,12 @@ export default function TimerBar({ endAt, onComplete }) {
 
   const intervalRef = useRef(null);
   const initialDuration = useRef(timeLeft);
+  const onCompleteRef = useRef(onComplete);
+
+  // Keep the callback fresh without forcing the timer to restart
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   useEffect(() => {
     // Clear any old interval
@@ -20,12 +26,12 @@ export default function TimerBar({ endAt, onComplete }) {
 
       if (remaining <= 0) {
         clearInterval(intervalRef.current);
-        onComplete?.();
+        onCompleteRef.current?.();
       }
     }, 1000);
 
     return () => clearInterval(intervalRef.current);
-  }, [endAt, onComplete]);
+  }, [endAt]); // Removed onComplete from here so the chart updates don't break the loop
 
   const percent =
     initialDuration.current > 0
