@@ -14,7 +14,7 @@ const BAR_CORNER_RADIUS = 20;
 const NAV_ITEMS = [
   { label: 'dashboard', to: '/', icon: 'home', match: (p) => p === '/' },
   { label: 'trade', to: '/trade', icon: 'chart', match: (p) => p === '/trade' }, // Crypto trade
-  { label: 'Forex', to: '/forex', icon: 'chart-bar', match: (p) => p === '/forex' },
+  //{ label: 'Forex', to: '/forex', icon: 'chart-bar', match: (p) => p === '/forex' },
   { label: 'history', to: '/trade-history', icon: 'history', match: (p) => p.startsWith('/trade-history') },
   { label: 'wallet', to: '/wallet', icon: 'wallet', match: (p) => p.startsWith('/wallet') },
   { label: 'profile', to: '/profile', icon: 'user', match: (p) => p.startsWith('/profile') }, // Now 6 items
